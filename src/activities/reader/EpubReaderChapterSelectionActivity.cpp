@@ -75,6 +75,7 @@ void EpubReaderChapterSelectionActivity::loop() {
 
   const bool skipPage = mappedInput.getHeldTime() > SKIP_PAGE_MS;
   const int pageItems = getPageItems();
+  const int pageStart = (selectorIndex - (selectorIndex % pageItems));
 
   if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) {
     const auto newSpineIndex = epub->getSpineIndexForTocIndex(selectorIndex);
@@ -87,15 +88,14 @@ void EpubReaderChapterSelectionActivity::loop() {
     onGoBack();
   } else if (prevReleased) {
     if (skipPage) {
-      selectorIndex =
-          ((selectorIndex / pageItems - 1) * pageItems + epub->getTocItemsCount()) % epub->getTocItemsCount();
+      selectorIndex = (pageStart >= pageItems) ? pageStart - pageItems : epub->getTocItemsCount() - 1;
     } else {
       selectorIndex = (selectorIndex + epub->getTocItemsCount() - 1) % epub->getTocItemsCount();
     }
     updateRequired = true;
   } else if (nextReleased) {
     if (skipPage) {
-      selectorIndex = ((selectorIndex / pageItems + 1) * pageItems) % epub->getTocItemsCount();
+      selectorIndex = (pageStart >= epub->getTocItemsCount() - pageItems) ? 0 : pageStart + pageItems;
     } else {
       selectorIndex = (selectorIndex + 1) % epub->getTocItemsCount();
     }
