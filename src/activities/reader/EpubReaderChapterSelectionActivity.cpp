@@ -127,6 +127,7 @@ void EpubReaderChapterSelectionActivity::loop() {
   const bool skipPage = mappedInput.getHeldTime() > SKIP_PAGE_MS;
   const int pageItems = getPageItems();
   const int totalItems = getTotalItems();
+  const int pageStart = (selectorIndex - (selectorIndex % pageItems));
 
   if (mappedInput.wasReleased(MappedInputManager::Button::Confirm)) {
     // Check if sync option is selected (first or last item)
@@ -147,14 +148,14 @@ void EpubReaderChapterSelectionActivity::loop() {
     onGoBack();
   } else if (prevReleased) {
     if (skipPage) {
-      selectorIndex = ((selectorIndex / pageItems - 1) * pageItems + totalItems) % totalItems;
+      selectorIndex = (pageStart >= pageItems) ? pageStart - pageItems : totalItems - (totalItems % pageItems);
     } else {
       selectorIndex = (selectorIndex + totalItems - 1) % totalItems;
     }
     updateRequired = true;
   } else if (nextReleased) {
     if (skipPage) {
-      selectorIndex = ((selectorIndex / pageItems + 1) * pageItems) % totalItems;
+      selectorIndex = (pageStart >= totalItems - pageItems) ? 0 : pageStart + pageItems;
     } else {
       selectorIndex = (selectorIndex + 1) % totalItems;
     }
